@@ -6,55 +6,147 @@
     <title>Circle Veyandi</title>
     <style>
         body {
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: black; /* Entire page background black */
-            color: red; /* Red headings */
-        }
-        h1 {
-            color: red; /* Heading color red */
-            font-size: 36px;
-            margin-bottom: 10px; /* Space between main heading and canvas */
-        }
-        h2 {
-            color: red; /* Subheading color red */
-            font-size: 28px;
-            margin-bottom: 20px; /* Space between subheading and canvas */
-        }
-        #score {
-            font-family: 'Arial', sans-serif;
-            color: white; /* Text color white */
-            background-color: #00e5ffdc; /* Background color red */
-            padding: 10px;
-            font-size: 20px;
-            text-align: center;
-            margin-top: 20px; /* Space above the score */
-        }
-        canvas {
-            border: none; /* No border around canvas */
-            box-shadow: none; /* No shadow */
-        }
-        #resetButton {
-            margin-top: 20px; /* Space between score and button */
-            padding: 10px 20px;
-            font-size: 16px;
+            background-color: black;
             color: white;
-            background-color: orange;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: red;
+        }
+
+        canvas {
+            display: block;
+            background-color: black;
             border: none;
+            margin: 20px auto;
+        }
+
+        #score {
+            font-size: 1.5em;
+            color: white;
+            margin-top: 20px;
+        }
+
+        #reset-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
+        }
+
+        /* Mobile Responsive Styles */
+        @media only screen and (max-width: 600px) {
+            canvas {
+                width: 90vw;
+                height: auto;
+            }
+
+            #score {
+                font-size: 1.2em;
+                margin-top: 10px;
+            }
+
+            #reset-button {
+                font-size: 1em;
+                padding: 8px 16px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Circle Veyandi</h1>
-    <h2>Circle Veyadam Vacha</h2>
-    <canvas id="drawingCanvas" width="500" height="500"></canvas>
+
+    <!-- Score -->
     <div id="score"></div>
-    <button id="resetButton">Reset</button>
-    <script src="script.js"></script>
+
+    <!-- Canvas -->
+    <canvas id="circle-game" width="400" height="400"></canvas>
+
+    <!-- Reset Button -->
+    <button id="reset-button">Reset</button>
+
+    <script>
+        const canvas = document.getElementById('circle-game');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let startX, startY;
+
+        // Function to start drawing
+        function startDrawing(e) {
+            drawing = true;
+            startX = e.offsetX;
+            startY = e.offsetY;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'gold';
+            ctx.lineWidth = 5;
+        }
+
+        // Function to stop drawing and evaluate circle
+        function stopDrawing(e) {
+            drawing = false;
+            const endX = e.offsetX;
+            const endY = e.offsetY;
+
+            // Calculate accuracy
+            const radiusStart = Math.sqrt(Math.pow(startX - canvas.width / 2, 2) + Math.pow(startY - canvas.height / 2, 2));
+            const radiusEnd = Math.sqrt(Math.pow(endX - canvas.width / 2, 2) + Math.pow(endY - canvas.height / 2, 2));
+            const accuracy = (Math.abs(radiusStart - radiusEnd) < 10) ? 100 : Math.max(0, 100 - Math.abs(radiusStart - radiusEnd) * 2);
+
+            // Update score
+            document.getElementById('score').textContent = `Your score: ${Math.round(accuracy)}%`;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+            ctx.strokeStyle = 'gold';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, radiusStart, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        // Function to draw on the canvas
+        function draw(e) {
+            if (!drawing) return;
+            const currentX = e.offsetX;
+            const currentY = e.offsetY;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.arc((startX + currentX) / 2, (startY + currentY) / 2, Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2)) / 2, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        // Reset the game
+        function resetGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('score').textContent = '';
+        }
+
+        // Event listeners
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        document.getElementById('reset-button').addEventListener('click', resetGame);
+
+        // Responsive canvas size adjustment
+        function resizeCanvas() {
+            if (window.innerWidth < 600) {
+                canvas.width = window.innerWidth * 0.9;
+                canvas.height = canvas.width;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas(); // Call initially to size correctly
+    </script>
 </body>
 </html>

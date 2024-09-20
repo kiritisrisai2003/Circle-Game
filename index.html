@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle Veyandi</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black; /* Entire page background black */
+            color: red; /* Red headings */
+        }
+        h1 {
+            color: red; /* Heading color red */
+            font-size: 36px;
+            margin-bottom: 10px; /* Space between main heading and canvas */
+        }
+        h2 {
+            color: red; /* Subheading color red */
+            font-size: 28px;
+            margin-bottom: 20px; /* Space between subheading and canvas */
+        }
+        #score {
+            font-family: 'Arial', sans-serif;
+            color: white; /* Text color white */
+            background-color: #00e5ffdc; /* Background color red */
+            padding: 10px;
+            font-size: 20px;
+            text-align: center;
+            margin-top: 20px; /* Space above the score */
+        }
+        canvas {
+            border: none; /* No border around canvas */
+            box-shadow: none; /* No shadow */
+        }
+        #resetButton {
+            margin-top: 20px; /* Space between score and button */
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: orange;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Circle Veyandi</h1>
+    <h2>Circle Veyadam Vacha</h2>
+    <canvas id="drawingCanvas" width="500" height="500"></canvas>
+    <div id="score"></div>
+    <button id="resetButton">Reset</button>
+    <script src="script.js"></script>
+</body>
+</html>

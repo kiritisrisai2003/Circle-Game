@@ -1,152 +1,199 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Circle Veyandi</title>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
+const canvas = document.getElementById('drawingCanvas');
+const ctx = canvas.getContext('2d');
+let isDrawing = false;
+let points = [];
 
-        h1 {
-            color: red;
-        }
+// Set canvas background color to black
+canvas.style.backgroundColor = 'black';
 
-        canvas {
-            display: block;
-            background-color: black;
-            border: none;
-            margin: 20px auto;
-        }
+// Center point of the circle
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const targetRadius = 100; // The radius of the target circle
 
-        #score {
-            font-size: 1.5em;
-            color: white;
-            margin-top: 20px;
-        }
+// Styling for the drawn circle
+const baseLineColor = 'gold'; // Base color for the circle
+const lineWidth = 3; // Reduced line thickness
+const glowEffect = 5; // Glow for a subtler light effect
+let currentColorIndex = 0;
 
-        #reset-button {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 1.2em;
-            background-color: red;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+// Colors for the multi-colored effect
+const colors = ['gold', 'blue', 'green', 'purple', 'orange'];
 
-        /* Mobile Responsive Styles */
-        @media only screen and (max-width: 600px) {
-            canvas {
-                width: 90vw;
-                height: auto;
-            }
+// Draw the center point
+function drawCenterPoint() {
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = 'red'; // Center point color red
+    ctx.fill();
+}
 
-            #score {
-                font-size: 1.2em;
-                margin-top: 10px;
-            }
+// Event listeners for mouse and touch events
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', endDrawing);
 
-            #reset-button {
-                font-size: 1em;
-                padding: 8px 16px;
-            }
+canvas.addEventListener('touchstart', startDrawing);
+canvas.addEventListener('touchmove', drawTouch);
+canvas.addEventListener('touchend', endDrawing);
 
-            h1 {
-                font-size: 1.8em;
-            }
-        }
-    </style>
-</head>
-<body>
-    <h1>Circle Veyandi</h1>
+function startDrawing(e) {
+    isDrawing = true;
+    points = []; // Reset the points array
+    ctx.beginPath();
+    e.preventDefault(); // Prevent scrolling on mobile
+}
 
-    <!-- Score -->
-    <div id="score"></div>
+function draw(e) {
+    if (!isDrawing) return;
+    
+    const x = e.offsetX;
+    const y = e.offsetY;
+    
+    points.push({ x, y }); // Store the drawn points
 
-    <!-- Canvas -->
-    <canvas id="circle-game" width="400" height="400"></canvas>
+    // Cycle through colors to add visual appeal
+    ctx.strokeStyle = colors[currentColorIndex];
+    ctx.lineWidth = lineWidth;
+    ctx.shadowBlur = glowEffect;
+    ctx.shadowColor = ctx.strokeStyle;
 
-    <!-- Reset Button -->
-    <button id="reset-button">Reset</button>
+    ctx.lineTo(x, y);
+    ctx.stroke();
 
-    <script>
-        const canvas = document.getElementById('circle-game');
-        const ctx = canvas.getContext('2d');
-        let drawing = false;
-        let startX, startY;
+    // Change color every 10 points
+    if (points.length % 10 === 0) {
+        currentColorIndex = (currentColorIndex + 1) % colors.length;
+    }
+}
 
-        // Function to start drawing
-        function startDrawing(e) {
-            drawing = true;
-            startX = e.offsetX;
-            startY = e.offsetY;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = 'gold';
-            ctx.lineWidth = 5;
-        }
+function drawTouch(e) {
+    if (!isDrawing) return;
 
-        // Function to stop drawing and evaluate circle
-        function stopDrawing(e) {
-            drawing = false;
-            const endX = e.offsetX;
-            const endY = e.offsetY;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.touches[0].clientX - rect.left;
+    const y = e.touches[0].clientY - rect.top;
 
-            // Calculate accuracy
-            const radiusStart = Math.sqrt(Math.pow(startX - canvas.width / 2, 2) + Math.pow(startY - canvas.height / 2, 2));
-            const radiusEnd = Math.sqrt(Math.pow(endX - canvas.width / 2, 2) + Math.pow(endY - canvas.height / 2, 2));
-            const accuracy = (Math.abs(radiusStart - radiusEnd) < 10) ? 100 : Math.max(0, 100 - Math.abs(radiusStart - radiusEnd) * 2);
+    points.push({ x, y });
 
-            // Update score
-            document.getElementById('score').textContent = `Your score: ${Math.round(accuracy)}%`;
+    // Cycle through colors to add visual appeal
+    ctx.strokeStyle = colors[currentColorIndex];
+    ctx.lineWidth = lineWidth;
+    ctx.shadowBlur = glowEffect;
+    ctx.shadowColor = ctx.strokeStyle;
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-            ctx.strokeStyle = 'gold';
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.arc(canvas.width / 2, canvas.height / 2, radiusStart, 0, 2 * Math.PI);
-            ctx.stroke();
-        }
+    ctx.lineTo(x, y);
+    ctx.stroke();
 
-        // Function to draw on the canvas
-        function draw(e) {
-            if (!drawing) return;
-            const currentX = e.offsetX;
-            const currentY = e.offsetY;
+    // Change color every 10 points
+    if (points.length % 10 === 0) {
+        currentColorIndex = (currentColorIndex + 1) % colors.length;
+    }
+}
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath();
-            ctx.arc((startX + currentX) / 2, (startY + currentY) / 2, Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2)) / 2, 0, 2 * Math.PI);
-            ctx.stroke();
-        }
+function endDrawing() {
+    isDrawing = false;
 
-        // Reset the game
-        function resetGame() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            document.getElementById('score').textContent = '';
-        }
+    // Ensure the user draws enough points and a relatively closed shape
+    if (points.length < 20 || !isShapeClosed(points)) {
+        displayScore('Keep Going! Try Completing the Shape!');
+        return;
+    }
+    
+    calculateAccuracy(points);
+}
 
-        // Event listeners
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        document.getElementById('reset-button').addEventListener('click', resetGame);
+// Check if the shape is closed by comparing start and end points
+function isShapeClosed(points) {
+    const start = points[0];
+    const end = points[points.length - 1];
 
-        // Responsive canvas size adjustment
-        function resizeCanvas() {
-            if (window.innerWidth < 600) {
-                canvas.width = window.innerWidth * 0.9;
-                canvas.height = canvas.width;
-            }
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas(); // Call initially to size correctly
-    </script>
-</body>
-</html>
+    // Check if the start and end points are close enough to consider the shape closed
+    const distance = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+    
+    return distance < 30; // More lenient threshold for closing the shape
+}
+
+// Calculate the accuracy of the drawn shape
+function calculateAccuracy(points) {
+    let sumDeviation = 0;
+    let maxDeviation = 0;
+    const count = points.length;
+
+    // Calculate the ideal radius for each point
+    let distances = points.map(point => {
+        const dx = point.x - centerX;
+        const dy = point.y - centerY;
+        return Math.sqrt(dx * dx + dy * dy); // Distance from the center
+    });
+
+    // Calculate the mean radius
+    const meanRadius = distances.reduce((a, b) => a + b, 0) / count;
+
+    // Calculate deviation from the target radius
+    distances.forEach(distance => {
+        const deviation = Math.abs(distance - targetRadius);
+        sumDeviation += deviation;
+
+        if (deviation > maxDeviation) maxDeviation = deviation;
+    });
+
+    const averageDeviation = sumDeviation / count;
+
+    // Define a threshold for the maximum allowable deviation
+    const maxAllowedDeviation = targetRadius * 0.3; // 30% deviation allowed
+
+    // Calculate the accuracy based on deviation from the target radius
+    const accuracy = Math.max(0, 100 - (averageDeviation * 2)); // Penalize higher deviations
+
+    // Provide feedback based on accuracy
+    if (maxDeviation > maxAllowedDeviation) {
+        const scoreMessage = `Not a better circle! Max deviation: ${maxDeviation.toFixed(2)}px`;
+        displayScore(scoreMessage);
+    } else {
+        const scoreValue = accuracy.toFixed(2);
+        displayScore(`Your accuracy: ${scoreValue}%`, scoreValue);
+    }
+}
+
+// Display the score or feedback message in red and white
+function displayScore(message, score) {
+    const scoreDiv = document.getElementById('score');
+    scoreDiv.style.color = 'white'; // Text color white
+    scoreDiv.style.backgroundColor = 'red'; // Background color red
+    scoreDiv.style.padding = '10px'; // Add some padding for better visibility
+    scoreDiv.textContent = message;
+
+    // Update URL with score
+    if (score !== undefined) {
+        const newUrl = `${window.location.origin}${window.location.pathname}?score=${score}`;
+        window.history.pushState({ path: newUrl }, '', newUrl);
+    }
+}
+
+// Function to get query parameters from the URL
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
+// On page load, check for score parameter
+window.onload = function () {
+    const score = getQueryParam('score');
+    if (score) {
+        displayScore(`Your friend's score: ${score}`, score);
+    }
+};
+
+// Function to reset the canvas and start over
+function resetCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCenterPoint(); // Redraw center point
+    document.getElementById('score').textContent = ''; // Clear the score
+}
+
+// Initial setup
+drawCenterPoint();
+
+// Reset button functionality
+document.getElementById('resetButton').addEventListener('click', resetCanvas);
